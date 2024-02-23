@@ -1,3 +1,5 @@
+# Check My Comment
+
 import json
 import yt_dlp
 import requests
@@ -6,12 +8,13 @@ import sys
 
 def getJson(url):
     headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0"
+        "User-Agent": 'Mozilla/5.0'#"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0"
     }
 
     soup = BeautifulSoup(requests.get(url, headers=headers).content, "html.parser")
     data = soup.find(type="application/json")
     for child in data.children:
+        # print(json.loads(child.string))
         return json.loads(child.string)
 
 def getCourse(jsonData):
@@ -20,13 +23,15 @@ def getCourse(jsonData):
         for chapter in chapters:
             course[chapter['title']] = {}
             for video in chapter['contents']:
+                # print(video)
                 if video['__typename'] == 'Video':
-                    course[chapter['title']][video['title']] = video['videoRef']
+                    course[chapter['title']][video['title']] = video['id'] # video['videoRef'] not exists
+                    # course[chapter['title']][video['title']] = video['videoRef'] 
         
         return course
 
 def downloader(course, args):
-    url_prefix = 'https://customer-3j2pofw9vdbl9sfy.cloudflarestream.com/'
+    url_prefix = 'https://customer-3j2pofw9vdbl9sfy.cloudflarestream.com/' # This url is not exits check it first
     url_suffix = '/manifest/video.mpd'
     
     for chapter in course:
@@ -66,7 +71,7 @@ def downloader(course, args):
 def main(args):
     if len(args) not in [2,3]:
         print('usage: submeta-dl.py <URL> <download path(optional)>')
-        return -1;
+        return -1
     json = getJson(args[1])
     course = getCourse(json)
     downloader(course, args)
@@ -74,6 +79,3 @@ def main(args):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-        
